@@ -181,7 +181,7 @@ re-run the command above.
 |---|------|-------|--------|---------|
 | 1 | PHP + extensions | 8.3.33, no mysqli | 8.2.34, full set | **Differs** — target PHP 8.2 syntax; local lacks mysqli so local code must not hard-require it |
 | 2 | DB engine | SQLite (db.php drop-in) | MariaDB 11.8.9; `@@default_storage_engine` = **InnoDB** (`SHOW ENGINES`: support=`DEFAULT`), measured 19 Oct 2026 | **Differs** — migrations are portable `.sql` with `{prefix}`/`{charset}` placeholders and no engine-specific SQL (see [CLI.md](CLI.md)) |
-| 3 | `wp_sv_*` migrations run at least once | ran locally (`0001_create_sv_jobs`, SQLite) | **ran 19 Oct 2026** (`wp sv migrate`; `iwp3f42_sv_jobs` exists under the hosted prefix `iwp3f42_`, `ENGINE=InnoDB` confirmed by dropping it and re-running the `.sql` from scratch) | run `wp sv migrate` on host after every deploy |
+| 3 | `wp_sv_*` migrations run at least once | ran locally (`0001_create_sv_jobs`, SQLite); tracked in `wp_sv_migrations` | **ran 19 Oct 2026** (`wp sv migrate`; `iwp3f42_sv_jobs` exists under the hosted prefix `iwp3f42_`, `ENGINE=InnoDB` confirmed by dropping it and re-running the `.sql` from scratch); deploy created `iwp3f42_sv_migrations` and backfilled `0001` from the old `sv_migrations` option | run `wp sv migrate` on host after every deploy |
 | 4 | .htaccess overrides allowed | n/a (built-in server ignores) | **No — inert (bogus directive → 200)** | **FAIL** — deny rules must be app-level PHP, not .htaccess |
 | 5 | HTTPS | http only (localhost) | https 200 | differs, expected |
 | 6 | Cron | n/a | no system cron in shell; WP-Cron on page hits | decision recorded above |
