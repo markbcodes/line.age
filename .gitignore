@@ -35,3 +35,22 @@ sv-core/.phpunit.cache/
 e2e/.auth/
 test-results/
 playwright-report/
+
+# WordPress core + runtime (this repo tracks only theme + sv-core)
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/xmlrpc.php
+/license.txt
+/readme.html
+/wp-content/db.php
+/wp-content/index.php
+/wp-content/database/
+/wp-content/mu-plugins/
+/wp-content/plugins/
+/wp-content/themes/*
+!/wp-content/themes/line-age/
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
