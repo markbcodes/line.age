@@ -29,12 +29,17 @@ final class Cli
 	public static function migrate(): int
 	{
 		$ran = Migrations::run();
+		foreach ($ran as $name) {
+			echo "Applied: {$name}\n";
+		}
+		// A failed migration is never recorded, so it is retried next run.
+		if (Migrations::$error !== '') {
+			echo Migrations::$error . "\n";
+			return 1;
+		}
 		if ($ran === []) {
 			echo "No migrations to run.\n";
 			return 0;
-		}
-		foreach ($ran as $name) {
-			echo "Applied: {$name}\n";
 		}
 		echo count($ran) . " migration(s) applied.\n";
 		return 0;

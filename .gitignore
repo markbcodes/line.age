@@ -26,7 +26,9 @@ yarn-error.log*
 wp-content/plugins/sv-core/
 
 # sv-core build/tooling (repo root)
-sv-core/vendor/
+# sv-core/vendor/ is INTENTIONALLY committed: the hosting has no Composer, so
+# the deployed plugin must carry its dependencies. Run `composer install
+# --no-dev` before committing it. (CLAUDE.md — stack.)
 sv-core/assets/js/*.bundle.js
 sv-core/assets/js/*.map
 sv-core/.phpunit.cache/
