@@ -1,0 +1,17 @@
+{
+  "name": "shader-classic-theme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "scripts": {
+    "dev": "npm install && vite build --watch",
+    "build": "npm install && vite build"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.12",
+    "tailwindcss": "^4.1.12",
+    "vite": "^6.3.5"
+  }
+}

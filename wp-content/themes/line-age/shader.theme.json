@@ -1,0 +1,36 @@
+{
+  "$schema": "https://shader.dev/theme.schema.json",
+  "type": "classic",
+  "build": {
+    "runtime": "node@20",
+    "install": "npm install",
+    "command": "npm run build"
+  },
+  "package": {
+    "include": [
+      "**/*.php",
+      "style.css",
+      "screenshot.png",
+      "screenshot.jpg",
+      "screenshot.webp",
+      "languages/**",
+      "licenses/**",
+      "vx-config/**",
+      "assets/build/**",
+      "assets/editor.css"
+    ],
+    "exclude": [
+      "node_modules/**",
+      "resources/**",
+      "tools/**",
+      "instructions/**",
+      "DESIGN.md",
+      ".git/**",
+      ".env*",
+      "*.map",
+      "package.json",
+      "package-lock.json",
+      "vite.config.js"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "shader/sv-core",
+  "version": "0.1.0",
+  "description": "App logic, app templates and built assets for the line.age site.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "yoast/phpunit-polyfills": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "SV\\App\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SV\\Tests\\": "tests/php/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

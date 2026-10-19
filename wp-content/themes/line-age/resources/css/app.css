@@ -1,0 +1,157 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "../../**/*.php";
+@source "../*.{js,css}";
+@source not "../../**/*.md";
+/* The CLI seeder renders no markup, and it is excluded from the production
+   package. Scanning it only mints phantom utilities from PHP keywords — a
+   `static $var` becomes `.static{position:static}` — and makes every seeder
+   edit dirty the compiled CSS. */
+@source not "../../tools/**";
+
+/* Design tokens go here, and only here: each one becomes utilities
+   (`--color-ink` → `text-ink`, `bg-ink`). Shader's INDEX.md lists them. */
+@theme {
+}
+
+@layer components {
+/* 100vw breakout (.alignfull) must never add a horizontal scrollbar. clip, unlike
+   hidden, creates no scroll container, so sticky headers keep working. */
+html {
+  overflow-x: clip;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: #000;
+  color: #fff;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* The admin bar sits on top of the page (z-index 99999); keep the focused skip
+   link below it. */
+.admin-bar .skip-link:focus {
+  top: calc(var(--wp-admin--admin-bar--height, 32px) + 1rem);
+}
+
+#wpadminbar,
+#wpadminbar * {
+  box-sizing: content-box;
+}
+
+#wpadminbar img,
+#wpadminbar svg {
+  display: inline;
+  max-width: none;
+  height: auto;
+  vertical-align: middle;
+}
+
+#wpadminbar a {
+  text-decoration: none;
+}
+
+#wpadminbar :focus-visible {
+  outline: revert;
+}
+
+/* Preflight zeroes every margin and core adds no flow spacing for classic themes.
+   The bottom margin matches core's unlayered :where(figure) { margin: 0 0 1em }. */
+.entry-content > * {
+  margin-block: 0 1em;
+}
+
+.entry-content > :last-child {
+  margin-block-end: 0;
+}
+
+.entry-content :is(h1, h2, h3, h4, h5, h6) {
+  font-size: revert;
+  font-weight: revert;
+  line-height: revert;
+}
+
+.entry-content ul {
+  list-style: disc;
+  padding-inline-start: 1.5em;
+}
+
+.entry-content ol {
+  list-style: decimal;
+  padding-inline-start: 1.5em;
+}
+
+.entry-content a {
+  text-decoration: underline;
+}
+
+.entry-content img,
+.entry-content video,
+.entry-content figure,
+.entry-content .wp-block-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+}
+
+/* Unlayered on purpose. Everything above loses to a Tailwind utility or to core
+   WordPress CSS, which is unlayered. These rules must win over both:
+   - the admin-bar offset over a `top-0` utility on a sticky header;
+   - alignment over core's `:where(figure) { margin: 0 0 1em }`, which would
+     otherwise reset every aligned image's side margins. */
+.admin-bar .site-header:is(.sticky, .fixed, .is-sticky) {
+  top: var(--wp-admin--admin-bar--height, 32px);
+}
+
+/* At 600px and below the admin bar is position: absolute and scrolls away, so a
+   sticky header offset by its height would stick with a gap above it. Core does
+   the same for its own sticky blocks. A fixed header keeps the offset so it does
+   not cover the bar at the top of the page. */
+@media (max-width: 600px) {
+  .admin-bar .site-header:is(.sticky, .is-sticky) {
+    top: 0;
+  }
+}
+
+.entry-content .alignleft {
+  float: left;
+  margin: 0 1.5em 1em 0;
+}
+
+.entry-content .alignright {
+  float: right;
+  margin: 0 0 1em 1.5em;
+}
+
+.entry-content .aligncenter {
+  display: block;
+  margin-inline: auto;
+}
+
+/* Break wide and full blocks out of a centered .entry-content of any width.
+   40rem is half the wide width (80rem); change it to match the content system. */
+.entry-content .alignwide {
+  max-width: none;
+  margin-inline: min(0px, calc(50% - min(50vw - 1rem, 40rem)));
+}
+
+.entry-content .alignfull {
+  max-width: none;
+  margin-inline: calc(50% - 50vw);
+}

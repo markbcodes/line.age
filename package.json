@@ -1,0 +1,17 @@
+{
+  "name": "line-age-site",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Repo-root tooling for sv-core: bundle (esbuild), unit tests (vitest), e2e (playwright). The theme has its own package.json.",
+  "scripts": {
+    "build": "esbuild sv-core/client-src/editor.js --bundle --minify --sourcemap --outfile=sv-core/assets/js/editor.bundle.js",
+    "test:unit": "vitest run",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "esbuild": "^0.24.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^2.1.0"
+  }
+}

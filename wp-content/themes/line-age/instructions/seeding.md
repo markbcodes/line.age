@@ -1,0 +1,26 @@
+# Seeding
+
+Unless the user opts out, create and execute a development-only PHP seeder after a VX-wired visible MVP exists. If the user only wants content, seed without waiting on polish. Templates may render empty states before the first successful run.
+
+The seed adds sample content and never changes a value that is set. A record that is missing is created. A record that exists only gets its empty fields filled, so the user's edits survive every run. Keep the whole recipe in `tools/seed.php` as the model grows: a new post type adds its records, and a new field adds its sample values to the existing records.
+
+The seed is for sample content. A change the user asks for on a built site goes through Shader's `vx` tool (`vx.md`), not the seed.
+
+Run it with Shader's `seed` tool, not with Bash. Pass a one-sentence reason the user will read, such as "Add sample events for the new Events type". Shader runs a dry run first. When the run would change what the site already has (fill fields on existing records, add records to a type that has some, add a menu link to something that already exists), it shows the user what the run would do and asks before it runs. The user may allow only the new records; the tool's result says so, and the existing records keep their empty fields. If the dry run fails, fix the recipe and call the tool again. Outside Shader, run `.shader/bin/php tools/seed.php` from the theme folder (`--dry-run` to preview); `AGENTS.md` says when `php` takes its place.
+
+- Overwriting is a reset: `reset` on the tool (`--reset` or `--reset=event,genre` outside Shader). It replaces the user's content of those types with the recipe. Reset only when the user asks for it, or when a field's format changed and its existing values no longer fit. Say what it will overwrite first.
+- When a field key is renamed, move the existing values to the new key with `vx-framework/set-post-values` before seeding. Otherwise the seed fills the new key with sample text.
+
+- Put the entry point at `tools/seed.php`. It holds only this site's records, below its `require __DIR__ . '/seed-lib.php'`. `tools/seed-lib.php` is Shader's seeding library: it boots this site's WordPress for the command line only, authorizes an administrator, and provides the helpers. Do not edit it; a newer Shader replaces it whole. Never run seeding from a frontend request, theme activation hook, or ordinary admin request.
+- Use VX's public in-process abilities through `wp_get_ability(...)->execute(...)`. Payloads are in `vx.md`.
+- Do not write VX fields with raw post, term, or option metadata. Core WordPress APIs are acceptable for core entity properties and Media Library imports, but VX-owned values must pass through VX validation.
+- Make the seeder idempotent. Identify records by stable slugs or an explicit seed marker, and never duplicate content on a second run. The stable slug is the ASCII slug `sanitize_title()` stores. A lookup on a slug that still contains `ë` never finds the row, and the next run inserts a duplicate. Reuse the helpers from `tools/seed-lib.php`: `seed_ability()`, `seed_upsert_post()`, `seed_upsert_term()`, `seed_option_values()`, `seed_media()`, `seed_site_identity()`, `seed_set_front_page()`, and `seed_nav_menu()`. Set a record's primary image with `featured_image` in the `seed_upsert_post()` props, and a page's template with `template`. Seed the home page with `'front_page' => true` in its props: it becomes the front page before its fields are written, so a fieldset shown only on the front page takes them. Use `seed_set_front_page()` only to set a posts page as well. Set the site title and tagline with `seed_site_identity()`, never with `update_option()`. Link `seed_nav_menu()` items to a `page` slug, a `post_type_archive`, or a `term` rather than a hard-coded `url`, so WordPress marks the current item and links survive slug changes. Items may include a `children` list. Children are stored with `menu-item-parent-id`. A flat list still works.
+- Write only through those helpers or `seed_ability()`. A dry run must write nothing, and raw WordPress writes would.
+- Seed the smallest coherent dataset: normally 3–5 primary records plus required related and settings records. Add more only when the brief needs another state.
+- Follow `media.md` when the seed needs downloaded imagery. Import files with `seed_media()`.
+- Do not create a Page whose slug equals a custom post type `permalink_base`. That Page will steal the archive URL.
+- Fail nonzero on validation errors. Treat `WP_Error` or `{ "ok": false }` as failure. Pass `strict: true` on value writes. An unfinished stub must also exit nonzero.
+- Run `php tools/check.php` before the first seed and after JSON config files change. It reports skipped config files and flushes permalinks so new URLs resolve.
+- End the seeder with `seed_done()`. It prints the summary.
+
+After seeding, confirm the existing templates render those records: the seeded VX values appear, and every image the design shows renders as a Media Library `<img>` (the featured image, or a VX image or gallery field). Leave browser QA to `quality.md`. The theme must still handle a production site where sample records are absent or later removed.

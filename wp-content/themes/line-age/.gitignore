@@ -1,0 +1,5 @@
+node_modules/
+*.map
+.shader/
+.mcp.json
+.claude/settings.local.json

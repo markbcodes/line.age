@@ -1,0 +1,37 @@
+# Friday Code workspace defaults
+node_modules/
+.pnp/
+.pnp.js
+dist/
+build/
+.next/
+out/
+.cache/
+coverage/
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+yarn-error.log*
+.friday/
+
+# WordPress loads the plugin through a directory junction; the real code lives
+# at the repository root (sv-core/). Without this the junction looks like a
+# second, untracked copy of every plugin file.
+wp-content/plugins/sv-core/
+
+# sv-core build/tooling (repo root)
+sv-core/vendor/
+sv-core/assets/js/*.bundle.js
+sv-core/assets/js/*.map
+sv-core/.phpunit.cache/
+.cache/
+.env
+e2e/.auth/
+test-results/
+playwright-report/
