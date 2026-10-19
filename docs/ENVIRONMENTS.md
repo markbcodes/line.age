@@ -186,7 +186,7 @@ re-run the command above.
 | 5 | HTTPS | http only (localhost) | https 200 | differs, expected |
 | 6 | Cron | n/a | no system cron in shell; WP-Cron on page hits | decision recorded above |
 | 7 | Uploads writable | yes | yes | match |
-| 8 | Snapshot/backup schedule | n/a | set in InstaWP dashboard (site → Snapshots) | **verify in dashboard** — not reachable via SSH |
+| 8 | Snapshot/backup schedule | n/a | **no automated backups listed** (Security → Backups, checked 19 Oct 2026); automated backups are plan-driven and stored off-host | **FAIL** — take an on-demand backup before risky changes (3 slots) or keep an independent copy; see [Backups](#backups-verified-19-oct-2026) |
 | 9 | Deploy paths | theme = Shader Push theme; plugin = `bin/deploy-plugin.sh` | same | match |
 | 10 | Shader push/pull content | dev sites **only** | dev sites **only** | rule, not an env property |
 
@@ -205,6 +205,29 @@ This site reported `production` out of the box (InstaWP sets no
 so deploys here now pass the guard unmodified. If InstaWP re-provisions the
 site, the value resets and deploys fail loudly until it is set again — intended,
 not a bug.
+
+### Backups (verified 19 Oct 2026)
+
+InstaWP *snapshots* and hosted-site *backups* are different products.
+Snapshots capture a site for relaunching or copying (paid, manual). Backups are
+the restore points for a live site, and they are **not user-scheduled**: the
+frequency follows the plan — Sandbox monthly, Starter weekly,
+Plus/Pro/Turbo/Elite daily — and every paid plan adds 3 on-demand slots.
+Backups are written to separate object storage, so the jailed shell cannot see
+them. Checked and confirmed: no backup directory under `/web`, no
+backup/plan options in the database, no plan metadata beyond
+`/etc/instawp-php` (`INSTAWP_PHP_DEFAULT`).
+
+**Result: the dashboard's Backups screen shows no automated backups for this
+site (reported 19 Oct 2026).** Treat the site as unprotected:
+
+- Before a risky change: site → **Security → Backups → Backup Now** (max 3
+  on-demand backups; delete an older one to free a slot).
+- The plugin code is in git and reproducible with `bin/build.sh`, but the
+  **database is not** — manuscripts and content have no off-platform copy.
+  Export it (`wp db export`) before destructive work, or snapshot the site.
+- InstaWP's own guidance: keep at least one independent copy outside their
+  infrastructure, because their backups sit in the same provider region.
 
 ### Tooling quirks
 

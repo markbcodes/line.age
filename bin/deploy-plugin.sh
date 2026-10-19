@@ -56,6 +56,12 @@ ENV_TYPE="$(ssh "${SSH_OPTS[@]}" "$SV_DEPLOY_SSH" "cd $SV_DEPLOY_PATH && wp eval
 echo "target environment_type: '${ENV_TYPE:-<unreadable>}'"
 $SV_PHP bin/deploy-guard.php "${ENV_TYPE:-}" $OVERRIDE || exit 1
 
+# --- 1b. Restore point: this site has NO automated backups (docs/ENVIRONMENTS.md
+# parity item 8), so a deploy has no rollback unless one is taken by hand first.
+echo "== reminder: take an on-demand backup before this risky change =="
+echo "   InstaWP dashboard -> site -> Security -> Backups -> Backup Now (3 slots max)"
+echo "   Continue with the deploy as usual; this is a reminder, not a gate."
+
 # --- 2. Build
 echo "== build =="
 bin/build.sh
