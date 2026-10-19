@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="sv-core">
+	<description>WordPress Coding Standards for the sv-core plugin.</description>
+
+	<file>sv-core.php</file>
+	<file>src</file>
+	<file>templates</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="ps"/>
+
+	<rule ref="WordPress"/>
+
+	<!-- Hook and WP-CLI callback signatures must accept their parameters even
+	     when a skeleton handler does not use them yet. -->
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed"/>
+	</rule>
+
+	<!-- PSR-4 autoloading is the plugin's contract: class files match the class
+	     name (src/App.php), not the WordPress class-foo.php convention. -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+
+	<!-- SV\Support\Log writes through error_log on purpose: it is the debug
+	     channel, and it is a no-op unless SV_DEBUG is on. -->
+	<rule ref="WordPress.PHP.DevelopmentFunctions">
+		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_error_log"/>
+	</rule>
+</ruleset>

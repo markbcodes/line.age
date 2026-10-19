@@ -21,7 +21,7 @@ only one form is a bug.
 
 ## Current commands
 
-    migrate     Run pending wp_sv_* migrations (records in the sv_migrations option)
+    migrate     Run pending wp_sv_* migrations (records in the {prefix}sv_migrations table)
     jobs        List the wp_sv_jobs table (empty state: "Job list is empty.")
     as-status   Report Action Scheduler state (absent here: "not installed")
 
@@ -44,8 +44,11 @@ a table prefix or a charset:
     {prefix}   -> $wpdb->prefix      (wp_ locally, iwp3f42_ on the hosted site)
     {charset}  -> $wpdb->get_charset_collate()
 
-Applied filenames are recorded in the `sv_migrations` option. A file that fails
-is **not** recorded, so the next run retries it instead of skipping it.
+Applied filenames are recorded in the **`{prefix}sv_migrations`** table
+(`filename`, `applied_at`), which the runner creates on first use. Installs that
+predate the table are backfilled once from the old `sv_migrations` option; that
+option is read but never written again. A file that fails is **not** recorded,
+so the next run retries it instead of skipping it.
 
 Migrate after `bin/deploy-plugin.sh`, since the deploy only installs files.
 

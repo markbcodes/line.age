@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'SV\\App\\Activation' => $baseDir . '/src/Activation.php',
     'SV\\App\\App' => $baseDir . '/src/App.php',
     'SV\\App\\Cli' => $baseDir . '/src/Cli.php',
     'SV\\App\\Maintenance' => $baseDir . '/src/Maintenance.php',
@@ -14,4 +15,6 @@ return array(
     'SV\\App\\Rest' => $baseDir . '/src/Rest.php',
     'SV\\App\\Templates' => $baseDir . '/src/Templates.php',
     'SV\\App\\WpCli' => $baseDir . '/src/WpCli.php',
+    'SV\\Support\\Debug' => $baseDir . '/src/Support/Debug.php',
+    'SV\\Support\\Log' => $baseDir . '/src/Support/Log.php',
 );

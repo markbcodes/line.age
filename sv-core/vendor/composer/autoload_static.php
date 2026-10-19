@@ -9,11 +9,16 @@ class ComposerStaticInit4ae4cf66accaae9e6d6ec44ed323b459
     public static $prefixLengthsPsr4 = array (
         'S' =>
         array (
+            'SV\\Support\\' => 11,
             'SV\\App\\' => 7,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'SV\\Support\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src/Support',
+        ),
         'SV\\App\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
@@ -22,6 +27,7 @@ class ComposerStaticInit4ae4cf66accaae9e6d6ec44ed323b459
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'SV\\App\\Activation' => __DIR__ . '/../..' . '/src/Activation.php',
         'SV\\App\\App' => __DIR__ . '/../..' . '/src/App.php',
         'SV\\App\\Cli' => __DIR__ . '/../..' . '/src/Cli.php',
         'SV\\App\\Maintenance' => __DIR__ . '/../..' . '/src/Maintenance.php',
@@ -29,6 +35,8 @@ class ComposerStaticInit4ae4cf66accaae9e6d6ec44ed323b459
         'SV\\App\\Rest' => __DIR__ . '/../..' . '/src/Rest.php',
         'SV\\App\\Templates' => __DIR__ . '/../..' . '/src/Templates.php',
         'SV\\App\\WpCli' => __DIR__ . '/../..' . '/src/WpCli.php',
+        'SV\\Support\\Debug' => __DIR__ . '/../..' . '/src/Support/Debug.php',
+        'SV\\Support\\Log' => __DIR__ . '/../..' . '/src/Support/Log.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
