@@ -18,3 +18,9 @@ if (! class_exists('SV\App\Templates')) {
 	fwrite(STDERR, "sv-core did not load: SV\\App\\Templates missing.\n");
 	exit(1);
 }
+
+// Shared fixtures and the tenant-scope probe. They are not test cases, so PHPUnit
+// never discovers them by filename; require them here so they resolve whether
+// vendor/ was built with or without the dev autoload entries.
+require_once __DIR__ . '/php/Tenancy.php';
+require_once __DIR__ . '/php/Probe.php';

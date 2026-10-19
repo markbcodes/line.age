@@ -31,7 +31,9 @@ if ( ! defined( 'SV_DEBUG' ) ) {
 
 // Prefer the composer autoloader; fall back to a PSR-4 loader so the plugin
 // still boots before `composer install` has run (fresh clone, before build).
-// The prefixes mirror composer.json: SV\App\ → src/, SV\Support\ → src/Support/.
+// The prefixes mirror composer.json and stay longest-first: SV\App\ → src/,
+// SV\Support\ → src/Support/, SV\Editor\ → src/Editor/, then SV\ → src/ for
+// the few root-namespace classes such as SV\Security.
 $sv_autoload = SV_PLUGIN_DIR . 'vendor/autoload.php';
 if ( is_readable( $sv_autoload ) ) {
 	require_once $sv_autoload;
@@ -41,6 +43,8 @@ if ( is_readable( $sv_autoload ) ) {
 			$prefixes = array(
 				'SV\\App\\'     => SV_PLUGIN_DIR . 'src/',
 				'SV\\Support\\' => SV_PLUGIN_DIR . 'src/Support/',
+				'SV\\Editor\\'  => SV_PLUGIN_DIR . 'src/Editor/',
+				'SV\\'          => SV_PLUGIN_DIR . 'src/',
 			);
 			foreach ( $prefixes as $prefix => $dir ) {
 				if ( ! str_starts_with( $classname, $prefix ) ) {

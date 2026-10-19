@@ -16,7 +16,9 @@
   "autoload": {
     "psr-4": {
       "SV\\App\\": "src/",
-      "SV\\Support\\": "src/Support/"
+      "SV\\Support\\": "src/Support/",
+      "SV\\Editor\\": "src/Editor/",
+      "SV\\": "src/"
     }
   },
   "autoload-dev": {

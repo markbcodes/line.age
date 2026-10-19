@@ -50,6 +50,75 @@ final class Rest {
 				'permission_callback' => 'is_user_logged_in',
 			)
 		);
+
+		self::document_routes();
+	}
+
+	/**
+	 * The document-version routes. Registered together so the whole manuscript
+	 * surface is visible in one place; every handler guards through
+	 * SV\Security first.
+	 */
+	private static function document_routes(): void {
+		$id_arg = array( 'id' => array( 'sanitize_callback' => 'absint' ) );
+
+		register_rest_route(
+			'sv/v1',
+			'/documents/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( Documents::class, 'latest' ),
+				'permission_callback' => array( Documents::class, 'permission' ),
+				'args'                => $id_arg,
+			)
+		);
+
+		register_rest_route(
+			'sv/v1',
+			'/documents/(?P<id>\d+)/versions',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( Documents::class, 'versions' ),
+					'permission_callback' => array( Documents::class, 'permission' ),
+					'args'                => array_merge(
+						$id_arg,
+						array(
+							'page'     => array( 'sanitize_callback' => 'absint' ),
+							'per_page' => array( 'sanitize_callback' => 'absint' ),
+						)
+					),
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( Documents::class, 'append' ),
+					'permission_callback' => array( Documents::class, 'permission' ),
+					'args'                => $id_arg,
+				),
+			)
+		);
+
+		register_rest_route(
+			'sv/v1',
+			'/documents/(?P<id>\d+)/versions/(?P<n>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( Documents::class, 'version' ),
+				'permission_callback' => array( Documents::class, 'permission' ),
+				'args'                => array_merge( $id_arg, array( 'n' => array( 'sanitize_callback' => 'absint' ) ) ),
+			)
+		);
+
+		register_rest_route(
+			'sv/v1',
+			'/documents/(?P<id>\d+)/restore',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( Documents::class, 'restore' ),
+				'permission_callback' => array( Documents::class, 'permission' ),
+				'args'                => array_merge( $id_arg, array( 'version' => array( 'sanitize_callback' => 'absint' ) ) ),
+			)
+		);
 	}
 
 	/** Public health check: {ok: true, user: <login|null>}. */

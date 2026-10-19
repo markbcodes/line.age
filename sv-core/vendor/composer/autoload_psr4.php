@@ -6,6 +6,12 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'SV\\Tests\\' => array($baseDir . '/tests/php'),
     'SV\\Support\\' => array($baseDir . '/src/Support'),
+    'SV\\Editor\\' => array($baseDir . '/src/Editor'),
     'SV\\App\\' => array($baseDir . '/src'),
+    'SV\\' => array($baseDir . '/src'),
+    'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
+    'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => array($vendorDir . '/dealerdirect/phpcodesniffer-composer-installer/src'),
+    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
 );

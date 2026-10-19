@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace SV\App;
 
+use SV\Security;
 use SV\Support\Debug;
 use SV\Support\Log;
 
@@ -33,6 +34,7 @@ final class App {
 		add_action( 'wp_enqueue_scripts', array( self::class, 'enqueue_assets' ) );
 		Maintenance::register();
 		Rest::register();
+		Security::attach();
 		Debug::attach();
 
 		// WP-CLI exists on the hosted site; bin/sv-cli.php is the local
