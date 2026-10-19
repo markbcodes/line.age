@@ -21,9 +21,10 @@ Passion project. Solo developer, WordPress background.
   exports, continuity checks, AI) AND all app templates (/templates/app) AND
   built client assets (/assets/js/editor.bundle.js).
 - Theme: chrome only (header, footer, styles, marketing, steward screens).
-  Shader's agent may rewrite the theme freely. It must NEVER edit sv-core.
+  Shader's agent may rewrite the theme freely.
 - App pages are served by the PLUGIN via template_include
-  (SV\App\Templates::maybe_override). Never put app templates in the theme.
+  (SV\App\Templates::maybe_override).
+- **Never edit sv-core from Shader's agent. Never put app templates in the theme.**
 - Editor: Tiptap/ProseMirror. TS source in sv-core/client-src, bundled with
   esbuild to sv-core/assets/js/editor.bundle.js, enqueued by the plugin on
   app pages only.
