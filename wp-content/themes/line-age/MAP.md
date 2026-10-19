@@ -25,8 +25,8 @@ Choices made with the user that the code doesn't explain, e.g. "Releases sort by
   (build → SSH to the InstaWP site → install zip → migrate); the theme ships
   through Shader's own push/download, because Shader owns the theme and knows
   nothing about `sv-core`. Do not build plugin-deploy machinery for the theme.
-- **Hosted target is `https://line-age.instawp.co`** (SSH as
-  `<ssh-user>@<host>`). It reports `environment_type=staging` — set
+- **Hosted target is `https://line-age.instawp.co`** (SSH target in `.env` as
+  `SV_DEPLOY_SSH` — never committed). It reports `environment_type=staging` — set
   deliberately, since InstaWP defaults every site to `production` and the
   deploy guard refuses production without `--i-know-what-im-doing`.
 - **The theme was seeded onto the host once by hand** (a tar/scp copy

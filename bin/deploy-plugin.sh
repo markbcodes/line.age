@@ -32,7 +32,8 @@ if [ -f .env ]; then
   set +a
 fi
 
-SV_DEPLOY_SSH="${SV_DEPLOY_SSH:-<ssh-user>@<host>}"
+# SV_DEPLOY_SSH has no default on purpose: the target lives in .env only, never in git.
+: "${SV_DEPLOY_SSH:?SV_DEPLOY_SSH not set - copy .env.example to .env and fill it in}"
 SV_DEPLOY_PATH="${SV_DEPLOY_PATH:-/web/line-age.instawp.co/public_html}"
 SV_DEPLOY_KEY="${SV_DEPLOY_KEY:-$HOME/.ssh/instawp_rsa}"
 # Host key goes to a repo-local file (.cache/, gitignored) — never ~/.ssh/known_hosts.

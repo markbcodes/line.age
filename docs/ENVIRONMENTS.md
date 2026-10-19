@@ -81,19 +81,20 @@ Requests can overlap locally — do not assume serialized execution.
 
 - Site URL **https://line-age.instawp.co** (HTTPS 200), web root
   **`/web/line-age.instawp.co/public_html`**.
-- SSH: `<ssh-user>@<host>`, key `~/.ssh/instawp_rsa` (RSA-4096;
-  the key toggle in InstaWP's SSH panel must be ON — enabling it was required
-  before the key was accepted). Known-hosts goes to a temp file, never
+- SSH: `<ssh-user>@<host>` (InstaWP dashboard → SSH Access; the real value lives
+  in `.env` as `SV_DEPLOY_SSH`, never in git), key `~/.ssh/instawp_rsa`
+  (RSA-4096; the key toggle in InstaWP's SSH panel must be ON — enabling it was
+  required before the key was accepted). Known-hosts goes to a temp file, never
   `~/.ssh/known_hosts`:
-  `ssh -i ~/.ssh/instawp_rsa -o UserKnownHostsFile=<tmp> <ssh-user>@<host>`
-- Hostname `<host-fqdn>` — **the host name
-  contains "production"**; treat deploys to it accordingly (see guard below).
-- WordPress **7.1.3**, active theme **twentytwentyfive** (the line-age theme
-  has not been pushed yet — push it from Shader's Push theme).
-- `wp_get_environment_type()` = **`production`** (InstaWP default;
-  `WP_ENVIRONMENT_TYPE` is not set in wp-config), `WP_DEBUG=no`,
-  `DISABLE_WP_CRON=no`. `wp-config.php` is writable if we ever want to set
-  `WP_ENVIRONMENT_TYPE=staging`.
+  `ssh -i ~/.ssh/instawp_rsa -o UserKnownHostsFile=<tmp> $SV_DEPLOY_SSH`
+- Underlying hostname **contains "production"**; treat deploys to it
+  accordingly (see guard below).
+- WordPress **7.1.3**, active theme **line-age** (deployed from Shader; the
+  theme always ships through Shader's Push theme, never from this repo).
+- `wp_get_environment_type()` = **`staging`** — set on 19 Oct 2026 with
+  `wp config set WP_ENVIRONMENT_TYPE staging`, because InstaWP defaults to
+  `production` and sets nothing in wp-config. `WP_DEBUG=no`,
+  `DISABLE_WP_CRON=no`. `wp-config.php` is writable.
 
 ### Runtime discovery, verbatim
 
@@ -115,8 +116,8 @@ write for 8.2, test on 8.3). Has mysqli + pdo_mysql (local does not).
 
 **F3 — DB engine**
 ```
-define( 'DB_NAME', '<db-name>' );
-define( 'DB_USER', '<db-user>' );
+define( 'DB_NAME', '<redacted — read it from wp-config.php on the host>' );
+define( 'DB_USER', '<redacted — read it from wp-config.php on the host>' );
 define( 'DB_HOST', 'localhost' );
 define( 'DB_CHARSET', 'utf8' );
 db_version=11.8.9   (via $wpdb->db_version(); "MariaDB from 11.8.9-MariaDB")
@@ -157,6 +158,21 @@ WordPress block) but inert (F4); InstaWP must-use plugins present
 email-dependent flows (password resets to real inboxes, notifications) can be
 tested here; table prefix is **`iwp3f42_`** (not `wp_`).
 
+### Hosted test account (Playwright)
+
+`sv-e2e` (administrator) is created by `bin/sv-e2e-user.php`, which is
+idempotent — it resets the password on every run and prints `SV_E2E_PASSWORD=`
+for `.env`. It must sit one level under the WP root (it does
+`dirname(__DIR__) . '/wp-load.php'`), so on the host: copy it to
+`<web root>/bin/`, run `php bin/sv-e2e-user.php sv-e2e`, then delete it and put
+the printed line in `.env`.
+
+**Learned 19 Oct 2026:** the hosted password had silently reverted and the
+hosted Playwright run failed in `auth.setup.js`. The login page states the cause
+outright — *"The password you entered for the username sv-e2e is incorrect."*
+An InstaWP snapshot restore puts the older password back, so `.env` can drift;
+re-run the command above.
+
 ---
 
 ## 3. Parity checklist — verified 19 Oct 2026 on the InstaWP site
@@ -164,8 +180,8 @@ tested here; table prefix is **`iwp3f42_`** (not `wp_`).
 | # | Item | Local | Hosted | Verdict |
 |---|------|-------|--------|---------|
 | 1 | PHP + extensions | 8.3.33, no mysqli | 8.2.34, full set | **Differs** — target PHP 8.2 syntax; local lacks mysqli so local code must not hard-require it |
-| 2 | DB engine | SQLite (db.php drop-in) | MariaDB 11.8.9 | **Differs** — all migrations portable (dbDelta, no engine-specific SQL) |
-| 3 | `wp_sv_*` migrations run at least once | ran locally (`0001_create_sv_jobs`) | **ran 19 Oct 2026** (`wp sv migrate` → applied; table `iwp3f42_sv_jobs` exists under the hosted prefix `iwp3f42_`) | run `wp sv migrate` on host after every deploy |
+| 2 | DB engine | SQLite (db.php drop-in) | MariaDB 11.8.9 | **Differs** — migrations are portable `.sql` with `{prefix}`/`{charset}` placeholders and no engine-specific SQL (see [CLI.md](CLI.md)) |
+| 3 | `wp_sv_*` migrations run at least once | ran locally (`0001_create_sv_jobs`, SQLite) | **ran 19 Oct 2026** (`wp sv migrate`; `iwp3f42_sv_jobs` exists under the hosted prefix `iwp3f42_`, `ENGINE=InnoDB` confirmed by dropping it and re-running the `.sql` from scratch) | run `wp sv migrate` on host after every deploy |
 | 4 | .htaccess overrides allowed | n/a (built-in server ignores) | **No — inert (bogus directive → 200)** | **FAIL** — deny rules must be app-level PHP, not .htaccess |
 | 5 | HTTPS | http only (localhost) | https 200 | differs, expected |
 | 6 | Cron | n/a | no system cron in shell; WP-Cron on page hits | decision recorded above |
@@ -174,16 +190,21 @@ tested here; table prefix is **`iwp3f42_`** (not `wp_`).
 | 9 | Deploy paths | theme = Shader Push theme; plugin = `bin/deploy-plugin.sh` | same | match |
 | 10 | Shader push/pull content | dev sites **only** | dev sites **only** | rule, not an env property |
 
-### Deploy guard (why `--i-know-what-im-doing` is needed here)
+### Deploy guard
 
 `bin/deploy-plugin.sh` queries the target's `wp_get_environment_type()` over
 SSH **first** and calls `bin/deploy-guard.php`, which refuses `production`
-(or an unreadable value) unless `--i-know-what-im-doing` is passed. The
-InstaWP site reports `production` (InstaWP sets no `WP_ENVIRONMENT_TYPE`), so
-**every deploy to this site requires the flag** — intentional, since the guard
-must protect real production too. If you prefer unflagged deploys, run once:
-`wp config set WP_ENVIRONMENT_TYPE staging` on the host (wp-config is
-writable).
+(or an unreadable value) unless `--i-know-what-im-doing` is passed. The guard
+exists to protect real production, so an unreadable value counts as production.
+
+This site reported `production` out of the box (InstaWP sets no
+`WP_ENVIRONMENT_TYPE`). It was switched once, on 19 Oct 2026:
+
+    wp config set WP_ENVIRONMENT_TYPE staging      # on the host
+
+so deploys here now pass the guard unmodified. If InstaWP re-provisions the
+site, the value resets and deploys fail loudly until it is set again — intended,
+not a bug.
 
 ### Tooling quirks
 
