@@ -1,0 +1,76 @@
+{
+    "$schema": "vx-config/v1",
+    "type": "fieldset",
+    "key": "sv_character",
+    "config": {
+        "active": true,
+        "description_display": "tooltip",
+        "fields": [
+            {
+                "key": "book",
+                "label": "Book",
+                "type": "number"
+            },
+            {
+                "key": "name",
+                "label": "Name",
+                "required": true,
+                "type": "text"
+            },
+            {
+                "key": "aliases",
+                "label": "Aliases",
+                "type": "list"
+            },
+            {
+                "key": "bio",
+                "label": "Bio",
+                "type": "textarea"
+            },
+            {
+                "key": "baseline_motivation",
+                "label": "Baseline motivation",
+                "type": "textarea"
+            },
+            {
+                "choices": [
+                    {
+                        "label": "Protagonist",
+                        "value": "protagonist"
+                    },
+                    {
+                        "label": "Antagonist",
+                        "value": "antagonist"
+                    },
+                    {
+                        "label": "Supporting",
+                        "value": "supporting"
+                    },
+                    {
+                        "label": "Minor",
+                        "value": "minor"
+                    }
+                ],
+                "key": "role",
+                "label": "Role",
+                "type": "select"
+            }
+        ],
+        "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-user-round\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"8\" r=\"5\"/><path d=\"M20 21a8 8 0 0 0-16 0\"/></svg>",
+        "label": "Character",
+        "location": {
+            "groups": [
+                {
+                    "object": "post_type",
+                    "targets": [
+                        "sv_character"
+                    ]
+                }
+            ]
+        },
+        "order": 10,
+        "rest": {
+            "expose": "private"
+        }
+    }
+}

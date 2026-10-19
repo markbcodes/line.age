@@ -1,0 +1,48 @@
+{
+    "$schema": "vx-config/v1",
+    "type": "fieldset",
+    "key": "sv_location",
+    "config": {
+        "active": true,
+        "description_display": "tooltip",
+        "fields": [
+            {
+                "key": "book",
+                "label": "Book",
+                "type": "number"
+            },
+            {
+                "key": "name",
+                "label": "Name",
+                "required": true,
+                "type": "text"
+            },
+            {
+                "key": "description",
+                "label": "Description",
+                "type": "textarea"
+            },
+            {
+                "key": "era_notes",
+                "label": "Era notes",
+                "type": "textarea"
+            }
+        ],
+        "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-compass\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\"/></svg>",
+        "label": "Location",
+        "location": {
+            "groups": [
+                {
+                    "object": "post_type",
+                    "targets": [
+                        "sv_location"
+                    ]
+                }
+            ]
+        },
+        "order": 10,
+        "rest": {
+            "expose": "private"
+        }
+    }
+}

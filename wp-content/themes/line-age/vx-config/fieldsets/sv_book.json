@@ -1,0 +1,125 @@
+{
+    "$schema": "vx-config/v1",
+    "type": "fieldset",
+    "key": "sv_book",
+    "config": {
+        "active": true,
+        "description_display": "tooltip",
+        "fields": [
+            {
+                "key": "workspace",
+                "label": "Workspace",
+                "type": "number"
+            },
+            {
+                "choices": [
+                    {
+                        "label": "Draft",
+                        "value": "draft"
+                    },
+                    {
+                        "label": "In review",
+                        "value": "in_review"
+                    },
+                    {
+                        "label": "Published",
+                        "value": "published"
+                    },
+                    {
+                        "label": "Retired",
+                        "value": "retired"
+                    }
+                ],
+                "default_value": "draft",
+                "key": "status",
+                "label": "Status",
+                "type": "select"
+            },
+            {
+                "key": "pinned_bible_version_id",
+                "label": "Pinned bible version",
+                "type": "number"
+            },
+            {
+                "key": "genre",
+                "label": "Genre",
+                "type": "text"
+            },
+            {
+                "key": "pov",
+                "label": "Point of view",
+                "type": "text"
+            },
+            {
+                "key": "tense",
+                "label": "Tense",
+                "type": "text"
+            },
+            {
+                "key": "target_words",
+                "label": "Target words",
+                "type": "number"
+            },
+            {
+                "key": "era_label",
+                "label": "Era label",
+                "type": "text"
+            },
+            {
+                "key": "banned_words",
+                "label": "Banned words",
+                "type": "list"
+            },
+            {
+                "choices": [
+                    {
+                        "label": "UK",
+                        "value": "UK"
+                    },
+                    {
+                        "label": "US",
+                        "value": "US"
+                    },
+                    {
+                        "label": "None",
+                        "value": "none"
+                    }
+                ],
+                "key": "spelling_variant",
+                "label": "Spelling variant",
+                "type": "select"
+            },
+            {
+                "choices": [
+                    {
+                        "label": "Yes",
+                        "value": "true"
+                    },
+                    {
+                        "label": "No",
+                        "value": "false"
+                    }
+                ],
+                "key": "serial_comma",
+                "label": "Serial comma",
+                "type": "select"
+            }
+        ],
+        "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-sliders-horizontal\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 5H3\"/><path d=\"M12 19H3\"/><path d=\"M14 3v4\"/><path d=\"M16 17v4\"/><path d=\"M21 12h-9\"/><path d=\"M21 19h-5\"/><path d=\"M21 5h-7\"/><path d=\"M8 10v4\"/><path d=\"M8 12H3\"/></svg>",
+        "label": "Book",
+        "location": {
+            "groups": [
+                {
+                    "object": "post_type",
+                    "targets": [
+                        "sv_book"
+                    ]
+                }
+            ]
+        },
+        "order": 10,
+        "rest": {
+            "expose": "private"
+        }
+    }
+}

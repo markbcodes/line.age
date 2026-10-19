@@ -1,0 +1,85 @@
+{
+    "$schema": "vx-config/v1",
+    "type": "fieldset",
+    "key": "sv_plot_beat",
+    "config": {
+        "active": true,
+        "description_display": "tooltip",
+        "fields": [
+            {
+                "key": "book",
+                "label": "Book",
+                "type": "number"
+            },
+            {
+                "key": "act",
+                "label": "Act",
+                "type": "number"
+            },
+            {
+                "key": "ordinal",
+                "label": "Ordinal",
+                "type": "number"
+            },
+            {
+                "key": "title",
+                "label": "Title",
+                "type": "text"
+            },
+            {
+                "key": "description",
+                "label": "Description",
+                "type": "textarea"
+            },
+            {
+                "choices": [
+                    {
+                        "label": "Planned",
+                        "value": "planned"
+                    },
+                    {
+                        "label": "Promised",
+                        "value": "promised"
+                    },
+                    {
+                        "label": "Paid off",
+                        "value": "paid_off"
+                    },
+                    {
+                        "label": "Abandoned",
+                        "value": "abandoned"
+                    }
+                ],
+                "key": "status",
+                "label": "Status",
+                "type": "select"
+            },
+            {
+                "key": "payoff_scene",
+                "label": "Payoff scene",
+                "post_types": [
+                    "sv_scene"
+                ],
+                "relation_key": "payoff_scene",
+                "relation_type": "has_one",
+                "type": "post_relation"
+            }
+        ],
+        "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-target\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/></svg>",
+        "label": "Plot beat",
+        "location": {
+            "groups": [
+                {
+                    "object": "post_type",
+                    "targets": [
+                        "sv_plot_beat"
+                    ]
+                }
+            ]
+        },
+        "order": 10,
+        "rest": {
+            "expose": "private"
+        }
+    }
+}
