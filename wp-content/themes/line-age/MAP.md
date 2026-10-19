@@ -63,6 +63,13 @@ Choices made with the user that the code doesn't explain, e.g. "Releases sort by
   safety net is `tools/check.php` (files VX skipped, keys templates read) plus
   `tools/verify-vx-model.php` (schema, the two-write trap, the gate and its
   cache, the export/import round trip). `bin/verify.sh` runs both.
+  The verifier also asserts the **committed manifest** — the exact set of
+  objects, count and keys, so an *extra* `vx-config/` object fails too — and
+  compares every object's canonical export to its committed file
+  **byte-for-byte**, which catches a database copy shadowing the JSON.
+  `vx-config/.gitattributes` pins `*.json` to LF: with `core.autocrlf=true` a
+  plain `git checkout` rewrites the files to CRLF and trips the byte check on a
+  clean tree.
 
 - **Importers must write through `tools/vx-write-lib.php`.** Creating a
   VX-backed post is two writes — core inserts the row, then VX's
@@ -88,11 +95,11 @@ Choices made with the user that the code doesn't explain, e.g. "Releases sort by
   to another — asserted in both directions by `spike/v2-can-read-gate.php` and
   the verifier.
 
-- **Open: the model has no non-editor reader surface.** Every fieldset exports
-  `rest: { expose: private }` (VX's secure default, and right for a writer's
-  private bible), so a logged-in non-editor always receives `"vx": {}` and the
-  `can_read` gate cannot be exercised by one. The V2 proofs raise `sv_scene` to
-  `authenticated` at runtime through `vxframework/fieldsets/resolved_fields`
-  rather than change the committed model. If the app is meant to serve book
-  data over REST to logged-in users, that exposure is a decision to take — and
-  it changes what readers can see.
+- **`rest.expose` stays `private`; the app never serves book data over VX
+  REST.** Every fieldset keeps VX's secure default. All app traffic goes
+  through `/sv/v1/` (cookie + `X-WP-Nonce`), and relation writes go through the
+  app's own write path, not VX REST. A logged-in non-editor therefore always
+  receives `"vx": {}`, so the `can_read` gate is only exercised by raising
+  `sv_scene` to `authenticated` at runtime (`vxframework/fieldsets/resolved_fields`),
+  as `spike/v2-can-read-gate.php` and the verifier do — the committed model
+  stays `private`.

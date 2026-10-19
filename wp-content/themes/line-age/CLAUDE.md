@@ -114,6 +114,60 @@ Passion project. Solo developer, WordPress background.
     in the UI.
 21. A book's event is linked into the manuscript via scenes.event_claim_id.
     An unlinked claim is a warning (check 16), not a blocker.
+22. VX does NOT validate relations, AND does not enforce required:true, AND
+    number fields accept any value. Treat every VX field as untyped.
+    - Required fields are enforced by OUR validation, never assumed.
+    - Numeric fields are validated + cast by US before write; read with
+      ->float()/->int() defensively.
+23. VX RELATION WRITES ARE SILENTLY LOSSY. Verified contract (base-driver.php:111
+    -> relation-table-strategy.php:290 -> relation-constraints.php:34 ->
+    relations-table.php:163):
+      - set_value(int $entity_id, array $field, $value): bool
+      - Returns TRUE (no warning, no error, ok:true at Runtime_Service) when a
+        target id is dropped for: nonexistent post, wrong post type, OR AN ID
+        THE CURRENT USER CANNOT READ.
+      - Returns true after dropping ALL targets — indistinguishable from a
+        deliberate clear (empty list is a successful DELETE).
+      - Returns false ONLY for infrastructure failures (bad relation_key, bad
+        kind, entity id <= 0, DB error) — and even false is swallowed when
+        storage_values_match() says the stored value already equals the request.
+      - Nothing escapes as an exception; sync_* and the runtime catch Throwable.
+    THEREFORE:
+      a) NEVER branch on the return value. Read the field back and compare.
+      b) ALL relation writes go through sv_write_relations() — pre-validate
+         (exists, post type, same book, user_can('read'), cardinality, no self),
+         write, read back, and return 422 relation_dropped on any diff.
+      c) Every job that writes relations MUST carry initiated_by in its payload,
+         and SV\Jobs\Runner MUST wp_set_current_user() before the handler.
+         Without a user, private targets are unreadable and EVERY relation
+         drops while reporting success. CLI equivalents require --user.
+      d) sv_verify_relations() is the reusable comparator; `wp sv verify-relations`
+         is the sweep. Report drift via Log + audit_log; never repair silently.
+    Never write relations through vx REST, the REST `vx` object, or any
+    ability — every path funnels through the same lossy driver.
+    e) wp sv verify-relations is REPORT-ONLY when scheduled. --fix is MANUAL ONLY,
+     enforced in code: requires an interactive TTY, refuses when SV_IN_JOB,
+     requires --reason recorded to audit_log, and requires explicit confirmation.
+     --fix repairs only fields whose targets still pass pre-validation; where a
+     target no longer exists or belongs to another book it reports "manual" and
+     SKIPS. It must never invent a replacement target, re-derive relations from
+     prose, or resolve a dropped reference by choosing for the author.
+     No scheduled job may call --fix. Drift is ESCALATED (logged, audited,
+     stewards notified as one digest), never auto-repaired.
+    This is mandatory in the metadata route, the importer, and any AI write.
+24. vxframework/rest/can_read / can_write WITHHOLD PAYLOAD; they cannot deny
+    the status code. They are defense-in-depth only. The real gate is
+    SV\Security::require() on every /sv/v1/ route. Never rely on a hook for
+    authorization.
+25. VX REST `expose` stays `private` for every fieldset. The app never serves
+    book data over VX REST to logged-in users. All app traffic goes through
+    /sv/v1/  with cookie + X-WP-Nonce and relation writes go through sv_write_relations().
+26. The VX schema gate is tools/verify-vx-model.php, NOT `config status
+    --strict` (which passes with objects missing). verify-vx-model.php must:
+    - assert the committed model manifest of expected objects (count + keys)
+    - assert each object's schema is byte-identical to the committed export
+    - run in bin/verify.sh
+    After any approved model change: export, edit manifest, verify, commit.
 
 ## DATA MODEL (authoritative)
 universes(id, name, current_bible_version_id, claim_visibility ENUM)

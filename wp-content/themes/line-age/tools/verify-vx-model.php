@@ -14,7 +14,9 @@
  * key a template reads that the model does not define. This then proves the
  * model actually behaves the way the app needs, against the running site:
  *
- *   1. model + schema   — every post type and fieldset resolves, and
+ *   1. model + schema   — every post type and fieldset in the committed
+ *                         manifest resolves, each object's canonical export
+ *                         matches its vx-config/ file byte for byte, and
  *                         `GET vx-framework/v1/rest/schema` reports the sv_scene
  *                         fields and their types.
  *   2. V1 two-write trap — creating through `/wp/v2/sv_scene` and failing the
@@ -138,10 +140,44 @@ final class Vx_Model_Verifier
 
 	private function verify_model_and_schema(): void
 	{
-		$this->section('1. model + rest/schema');
+		$this->section('1. model + committed bytes + rest/schema');
 
-		$this->check('every modelled post type resolves', $this->missing('post_types', VX_VERIFY_POST_TYPES) === []);
-		$this->check('every modelled fieldset resolves', $this->missing('fieldsets', VX_VERIFY_FIELDSETS) === []);
+		// The manifest: the objects the committed model is expected to define.
+		// Asserting the exact set (count + keys) is what catches an object added
+		// to or removed from vx-config/ — the same blind spot `config status
+		// --strict` has, one level down.
+		foreach ($this->manifest_groups() as $group => $expected) {
+			$this->check("the {$group} manifest has no missing object", $this->missing($group, $expected) === []);
+			$this->check(
+				"the model defines exactly the {$group} manifest (" . count($expected) . ')',
+				$this->sorted(array_keys(Resolver::get_group($group))) === $this->sorted($expected),
+				'resolved ' . wp_json_encode($this->sorted(array_keys(Resolver::get_group($group))))
+			);
+			$this->check(
+				"the committed {$group} files are exactly the manifest",
+				$this->sorted(array_keys(Code_Source_Loader::group($group))) === $this->sorted($expected),
+				'committed ' . wp_json_encode($this->sorted(array_keys(Code_Source_Loader::group($group))))
+			);
+		}
+
+		// Byte identity: every object's canonical export must equal its committed
+		// file exactly. This catches a database copy shadowing the JSON (an
+		// admin-UI edit, or a `config import` that never touched the file) — the
+		// drift `config status` calls OVERRIDDEN.
+		foreach ($this->manifest_groups() as $group => $expected) {
+			foreach ($expected as $key) {
+				$file   = Code_Source_Loader::source_of($group, $key);
+				$export = Exporter::export_json($group, $key);
+				$ok     = is_string($file) && is_file($file)
+					&& ($export['ok'] ?? false) === true
+					&& (string) ($export['json'] ?? '') === (string) file_get_contents($file);
+				$this->check(
+					"the {$group} object {$key} matches its committed file byte-for-byte",
+					$ok,
+					$ok ? '' : 'file=' . (is_string($file) ? $file : 'none') . ' export_ok=' . wp_json_encode($export['ok'] ?? null)
+				);
+			}
+		}
 
 		$schema = $this->schema();
 		$this->check('GET /vx-framework/v1/rest/schema returns a JSON object', is_array($schema) && $schema !== []);
@@ -503,6 +539,30 @@ final class Vx_Model_Verifier
 	{
 		$defined = Resolver::get_group($group);
 		return array_values(array_filter($keys, static fn (string $key): bool => ! array_key_exists($key, $defined)));
+	}
+
+	/**
+	 * The committed manifest: group => the object keys vx-config/ must define.
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	private function manifest_groups(): array
+	{
+		return [
+			'post_types' => VX_VERIFY_POST_TYPES,
+			'fieldsets'  => VX_VERIFY_FIELDSETS,
+		];
+	}
+
+	/**
+	 * @param array<int, string> $values
+	 * @return array<int, string> The same values, sorted, for set comparison.
+	 */
+	private function sorted(array $values): array
+	{
+		$out = array_values($values);
+		sort($out);
+		return $out;
 	}
 
 	/**

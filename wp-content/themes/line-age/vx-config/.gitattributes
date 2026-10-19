@@ -1,0 +1,5 @@
+# The model is the contract: tools/verify-vx-model.php compares each object's
+# canonical export to these files byte for byte. Force LF on checkout so a
+# machine with core.autocrlf=true does not rewrite them to CRLF and fail a
+# clean working tree.
+*.json text eol=lf
