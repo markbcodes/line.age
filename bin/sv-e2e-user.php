@@ -3,6 +3,7 @@
  * bin/sv-e2e-user.php — creates/updates the dedicated Playwright account
  * (default sv-e2e, administrator) and prints its password once.
  * Idempotent: resets the password on every run so .env always matches.
+ * Passwords are alphanumeric so .env stays safe to `source` (see below).
  *
  *   php bin/sv-e2e-user.php [username] [email]
  *
@@ -25,7 +26,11 @@ $root = dirname(__DIR__);
 define('WP_USE_THEMES', false);
 require_once $root . '/wp-load.php';
 
-$password = wp_generate_password(24, true, true);
+// Alphanumeric only, on purpose: .env is sourced by the documented hosted run
+// (`set -a; . ./.env; set +a`), so a password containing a backtick, a space or
+// a quote would break the shell before it ever reaches wp-login.php. 24 chars
+// of [A-Za-z0-9] is ~143 bits.
+$password = wp_generate_password(24, false);
 
 $user = get_user_by('login', $username);
 if ($user) {

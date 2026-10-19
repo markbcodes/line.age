@@ -30,6 +30,25 @@ Examples:
     wp sv migrate                # hosted
     php bin/sv-cli.php migrate   # local (from the repository root)
 
+## Migrations
+
+`sv-core/migrations/` holds numbered **`.sql`** files (`0001_...`, `0002_...`),
+run in filename order by `SV\App\Migrations` — the same runner behind `wp sv
+migrate`, `php bin/sv-cli.php migrate`, and the Maintenance button. Each file is
+idempotent (`CREATE TABLE IF NOT EXISTS`) and re-runnable, and every table is
+InnoDB.
+
+Two placeholders are substituted before a file runs, so no file is ever tied to
+a table prefix or a charset:
+
+    {prefix}   -> $wpdb->prefix      (wp_ locally, iwp3f42_ on the hosted site)
+    {charset}  -> $wpdb->get_charset_collate()
+
+Applied filenames are recorded in the `sv_migrations` option. A file that fails
+is **not** recorded, so the next run retries it instead of skipping it.
+
+Migrate after `bin/deploy-plugin.sh`, since the deploy only installs files.
+
 ## Hosted quirks (learned 19 Oct 2026)
 
 - WP-CLI registers class methods under their **literal** name: the method

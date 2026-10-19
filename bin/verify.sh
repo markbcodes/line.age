@@ -27,14 +27,16 @@ if [ -f "$ROOT/.env" ]; then
 fi
 
 echo "== 1/3 phpunit =="
-if [ ! -f sv-core/vendor/bin/phpunit ]; then
-  if command -v composer >/dev/null 2>&1; then
-    (cd sv-core && composer install --no-interaction)
-  else
-    mkdir -p .cache
-    [ -f .cache/composer.phar ] || curl -fsSL https://getcomposer.org/download/latest-stable/composer.phar -o .cache/composer.phar
-    (cd sv-core && $SV_PHP "$ROOT/.cache/composer.phar" install --no-interaction)
-  fi
+# Always install, never skip on the presence of vendor/bin/phpunit: bin/build.sh
+# leaves sv-core/vendor/ in a --no-dev, optimized state (that is the tree we
+# commit), so dev files can be present while the generated autoloader still
+# cannot resolve PHPUnit's classes. Composer is a no-op when already in sync.
+if command -v composer >/dev/null 2>&1; then
+  (cd sv-core && composer install --no-interaction)
+else
+  mkdir -p .cache
+  [ -f .cache/composer.phar ] || curl -fsSL https://getcomposer.org/download/latest-stable/composer.phar -o .cache/composer.phar
+  (cd sv-core && $SV_PHP "$ROOT/.cache/composer.phar" install --no-interaction)
 fi
 (cd sv-core && $SV_PHP vendor/bin/phpunit)
 
@@ -49,3 +51,13 @@ fi
 npx playwright test
 
 echo "== verify: OK =="
+
+# phpunit needs its dev packages, but sv-core/vendor/ is committed as a --no-dev
+# tree (the hosting has no Composer, so the plugin ships its dependencies).
+# Warn instead of silently reverting, so the tree is never committed wrong.
+if [ -d sv-core/vendor/phpunit ]; then
+  echo
+  echo "note: sv-core/vendor/ now holds dev packages (phpunit)."
+  echo "      Run bin/build.sh — or (cd sv-core && composer install --no-dev) —"
+  echo "      before committing, so the committed vendor matches the artifact."
+fi

@@ -32,6 +32,13 @@ bin/verify.sh        # phpunit + vitest + playwright, fail-fast
 `bin/build.sh` produces the installable plugin zip at
 `dist/sv-core-<version>.zip`.
 
+`sv-core/vendor/` is **committed on purpose**: the hosting has no Composer, so
+the deployed plugin carries its own dependencies. `bin/build.sh` runs
+`composer install --no-dev` before zipping, which is also what restores the
+committable tree — `bin/verify.sh` installs phpunit's dev packages into that
+same directory. Run `bin/build.sh` before committing `sv-core/` and the
+committed vendor always matches the artifact that ships.
+
 ## Deploy
 
 ```bash
@@ -43,7 +50,9 @@ The theme ships separately, through Shader's own push — not from here.
 ## Requirements
 
 PHP 8.2+ (the hosted site runs 8.2; local dev runs 8.3), Node 20+, and
-Composer. On Windows, run the `bin/*.sh` scripts through Git Bash.
+Composer — optional, since the scripts fall back to a downloaded
+`.cache/composer.phar`. On Windows, run the `bin/*.sh` scripts through Git
+Bash.
 
 ## Local setup
 
