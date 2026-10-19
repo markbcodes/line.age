@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bin/verify.sh — full verification pipeline, fail-fast, nonzero exit on any
-# failure. Order: phpcs -> phpunit -> vitest -> playwright.
+# failure. Order: phpcs -> phpunit -> vx model -> vitest -> playwright.
 #
 #   WP_BASE_URL=http://line-age.localhost   bin/verify.sh   # Shader local
 #   WP_BASE_URL=https://line-age.instawp.co bin/verify.sh   # InstaWP hosted
@@ -26,7 +26,7 @@ if [ -f "$ROOT/.env" ]; then
   done < "$ROOT/.env"
 fi
 
-echo "== 1/4 phpcs (WordPress standards) =="
+echo "== 1/5 phpcs (WordPress standards) =="
 # Always install, never skip on the presence of vendor/bin/phpunit: bin/build.sh
 # leaves sv-core/vendor/ in a --no-dev, optimized state (that is the tree we
 # commit), so dev files can be present while the generated autoloader still
@@ -40,13 +40,21 @@ else
 fi
 (cd sv-core && $SV_PHP vendor/bin/phpcs)
 
-echo "== 2/4 phpunit =="
+echo "== 2/5 phpunit =="
 (cd sv-core && $SV_PHP vendor/bin/phpunit)
 
-echo "== 3/4 vitest =="
+# The theme's VX model is the app's data layer: 7 post types and 7 fieldsets,
+# authored in wp-content/themes/line-age/vx-config/. This proves they resolve,
+# that the REST schema matches them, that the two-write orphan trap is closed,
+# that the can_read gate never leaks one viewer's payload to another, and that
+# the model survives an export/import round trip.
+echo "== 3/5 VX model (wp-content/themes/line-age) =="
+(cd wp-content/themes/line-age && $SV_PHP tools/check.php && $SV_PHP tools/verify-vx-model.php)
+
+echo "== 4/5 vitest =="
 npm run test:unit
 
-echo "== 4/4 playwright (WP_BASE_URL=${WP_BASE_URL:-http://line-age.localhost}) =="
+echo "== 5/5 playwright (WP_BASE_URL=${WP_BASE_URL:-http://line-age.localhost}) =="
 if [ ! -f .env ] && [ -z "${SV_E2E_PASSWORD:-}" ]; then
   echo "verify: SV_E2E_PASSWORD not set and no .env found. Copy .env.example to .env." >&2
   exit 1
